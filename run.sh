@@ -31,7 +31,7 @@ echo "Removing spaces from sequence names "
 ##mv ${FILE}.rn ${FILE}
 
 echo "Trimming down to the S neighborhood"
-##$P3 python/filter-sites.py $FILE > ${FILE}.S.raw 20000,26000
+$P3 python/filter-sites.py $FILE > ${FILE}.S.raw 20000,26000
 
 if [ -z "$PREV" ] || [ $PREV == "NONE" ]
 then
@@ -42,7 +42,7 @@ then
 
 else
     echo "Extracting new/changed sequences"
-    fasta_diff -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
+    ##$FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
     echo "Running bealign on the new sequences"
     ##$BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
     ##$BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
@@ -65,18 +65,18 @@ echo "Compressing to haplotypes at $T distance and checking for outliers"
 
 echo "Rebuilding consensus and striking orphans"
 
-##$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
+$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
 
 if [ -z "$REF" ] || [ $REF == "NONE" ]
 then
     echo "No reference sequences to add"
 else
     echo "Appending reference sequences"
-    ##cat $REF >> ${FILE}.S.uniq.fas 
+    cat $REF >> ${FILE}.S.uniq.fas 
 fi
 
 echo "Running raxml"
-##$RXML --redo --threads 5 --msa ${FILE}.S.uniq.fas --tree pars{5} --model GTR+G+I
+$RXML --redo --threads 5 --msa ${FILE}.S.uniq.fas --tree pars{5} --model GTR+G+I
 
 echo "Labeling trees"
 if [ -z "$REF" ] || [ $REF == "NONE" ]
@@ -93,16 +93,16 @@ else
 fi
  
 echo "Running SLAC"
-##$HYPHY slac --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled.nwk --branches $ALL --samples 0
+$HYPHY slac --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled.nwk --branches $ALL --samples 0
 
 
-##$HYPHY hbl/slac-mapper.bf ${FILE}.S.uniq.fas.SLAC.json ${FILE}.subs.json
+$HYPHY hbl/slac-mapper.bf ${FILE}.S.uniq.fas.SLAC.json ${FILE}.subs.json
 
 echo "Running BGM"
-##$HYPHY LIBPATH=/Users/sergei/Development/hyphy/res bgm --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --min-subs 2 --steps 1000000 --samples 1000 --burn-in 100000
+$HYPHY LIBPATH=/Users/sergei/Development/hyphy/res bgm --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --min-subs 2 --steps 1000000 --samples 1000 --burn-in 100000
 
 echo "Running BUSTED[S]"
-##$HYPHY busted  --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --rates 3 --starting-points 5
+$HYPHY busted  --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --rates 3 --starting-points 5
 
 echo "Running FEL"
 
