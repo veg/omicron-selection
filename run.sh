@@ -27,8 +27,8 @@ FILE=$1
 PREV=$2
 
 echo "Removing spaces from sequence names "
-##awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
-##mv ${FILE}.rn ${FILE}
+awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
+mv ${FILE}.rn ${FILE}
 
 echo "Trimming down to the S neighborhood"
 $P3 python/filter-sites.py $FILE > ${FILE}.S.raw 20000,26000
@@ -42,26 +42,26 @@ then
 
 else
     echo "Extracting new/changed sequences"
-    ##$FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
+    $FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
     echo "Running bealign on the new sequences"
-    ##$BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
-    ##$BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
+    $BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
+    $BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
     echo "Merging MSA files"
-    ##$FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
+    $FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
 fi
 
 echo "Compressing to unique haplotypes"
-##$P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
-##$P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
+$P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
+$P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
 
-##$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
-##$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
+$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
+$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
 
 echo "Compressing to haplotypes at $T distance and checking for outliers"
-##$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
-##$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
-##$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
-##$P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.json > ${FILE}.S.uniq-all.fas 2> ${FILE}.S.blacklist.txt
+$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
+$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
+$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
+$P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.json > ${FILE}.S.uniq-all.fas 2> ${FILE}.S.blacklist.txt
 
 echo "Rebuilding consensus and striking orphans"
 
