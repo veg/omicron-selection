@@ -1,4 +1,4 @@
-# Executable commands
+ Executable commands
 P3=python3.9
 BEALIGN=bealign
 BAM2MSA=bam2msa
@@ -10,26 +10,26 @@ FASTA_DIFF=fasta_diff
 
 
 T="${3:-0.00075}"
-#clustering threshold
+clustering threshold
 
 T2="${4:-0.002}"
-#outliner threshold
+outliner threshold
 
 T3="${5:-3}"
-#minimum number of sequences per cluster to include in final tree
+minimum number of sequences per cluster to include in final tree
 
 REF="${6:-NONE}"
-#add sequences from this file as references (outgroups)
+add sequences from this file as references (outgroups)
 
 FILE=$1
 PREV=$2
 
 echo "Removing spaces from sequence names "
-#awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
-#mv ${FILE}.rn ${FILE}
+awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
+mv ${FILE}.rn ${FILE}
 
 echo "Trimming down to the S neighborhood"
-#$P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
+$P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
 
 if [ -z "$PREV" ] || [ $PREV == "NONE" ]
 then
@@ -40,33 +40,32 @@ then
 
 else
     echo "Extracting new/changed sequences"
- #   $FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
+    $FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
     echo "Running bealign on the new sequences"
- #   $BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
- #   $BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
+    $BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
+    $BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
     echo "Merging MSA files"
- #   $FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
+    $FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
 fi
 
 echo "Compressing to unique haplotypes"
-#$P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
-#$P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
+$P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
+$P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
 
-#$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
-#$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
+$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
+$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
 
 echo "Compressing to haplotypes at $T distance and checking for outliers"
-#$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
-#$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
-#$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
-#$P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.json > ${FILE}.S.uniq-all.fas 2> ${FILE}.S.blacklist.txt
+$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
+$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
+$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
+$P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.json > ${FILE}.S.uniq-all.fas 2> ${FILE}.S.blacklist.txt
 
 
 echo "Rebuilding consensus and striking orphans"
 
-#$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq2.fas 
+$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq2.fas 
 
-#exit 0
 
 if [ -z "$REF" ] || [ $REF == "NONE" ]
 then
@@ -94,7 +93,7 @@ else
 fi
  
 echo "Running SLAC"
-$HYPHY slac --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled.nwk --branches $ALL --samples 0
+$HYPHY slac --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain --tree ${FILE}.S.labeled.nwk --branches $ALL --samples 0
 
 
 $HYPHY hbl/slac-mapper.bf ${FILE}.S.uniq.fas.SLAC.json ${FILE}.subs.json

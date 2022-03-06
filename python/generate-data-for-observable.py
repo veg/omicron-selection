@@ -78,6 +78,7 @@ for root, dirs, files in os.walk(settings.input):
         problematic = set ()
         
         with open (file_name (root, base_name, required_extensions["variants"]), "r") as fh:
+            print (file_name (root, base_name, required_extensions["variants"]), file = sys.stderr)
             variant_json = json.load (fh)
             directory_record["N"] = variant_json["N"]
             directory_record["H"] = variant_json["H"]
@@ -124,6 +125,7 @@ for root, dirs, files in os.walk(settings.input):
         
             
         with open (file_name (root, base_name, required_extensions["slac"]), "r") as fh:
+            print (file_name (root, base_name, required_extensions["slac"]), file = sys.stderr)
             slac_info = json.load (fh)
             L    = len (slac_info["MLE"]["content"]["0"]["by-site"]["RESOLVED"])
             S    = sum ([k[2] for k in slac_info["MLE"]["content"]["0"]["by-site"]["RESOLVED"]]) / L
@@ -155,6 +157,7 @@ for root, dirs, files in os.walk(settings.input):
         directory_record ['issues'] = {'problematic' : sorted (list(problematic)), 'N rich' : sorted (list (N_rich))}
         
         with open (file_name (root, base_name, required_extensions["meme"]), "r") as fh:
+            print (file_name (root, base_name, required_extensions["meme"]), file = sys.stderr)
             meme_info = json.load (fh)
             directory_record ['omega'] = {
                     "leaves" : meme_info["fits"]["Global MG94xREV"]["Rate Distributions"]["non-synonymous/synonymous rate ratio for *background*"][0][0],
@@ -171,6 +174,7 @@ for root, dirs, files in os.walk(settings.input):
                     ever_selected.add (site)
 
         with open (file_name (root, base_name, required_extensions["fel"]), "r") as fh:
+            print (file_name (root, base_name, required_extensions["fel"]), file = sys.stderr)
             fel_info = json.load (fh)
             for site, fel_data in enumerate (fel_info["MLE"]["content"]["0"]):
                      
@@ -187,6 +191,7 @@ for root, dirs, files in os.walk(settings.input):
         if is_max:
             try:
                 with open (file_name (root, base_name, ".subs.json"), "r") as fh:
+                    print (file_name (root, base_name, ".subs.json"), file = sys.stderr)
                     substitutions = json.load (fh)
             except Exception as e:
                 print (e, file = sys.stderr)
@@ -194,9 +199,11 @@ for root, dirs, files in os.walk(settings.input):
             
             for e in ["Cluster 1","Cluster 2","Cluster 3"]:
                 with open (file_name (root, base_name, required_extensions[e])) as fh:
-                    clusters[e] = json.load (fh)
+                   print (file_name (root, base_name, required_extensions[e]), file = sys.stderr)
+                   clusters[e] = json.load (fh)
         
             with open (file_name (root, base_name, required_extensions["bgm"]), "r") as fh:
+                print (file_name (root, base_name, required_extensions["bgm"]), file = sys.stderr)
                 bgm_info = json.load (fh)
                 pairs    = []
                 if "MLE" in bgm_info:
@@ -205,6 +212,7 @@ for root, dirs, files in os.walk(settings.input):
                             pairs.append (pair_info)
   
             with open (file_name (root, base_name, required_extensions["busted"]), "r") as fh:
+                print (file_name (root, base_name, required_extensions["busted"]), file = sys.stderr)
                 busted_info = json.load (fh)
                 #print (busted_info["fits"]["Unconstrained model"]["Rate Distributions"])
                 busted = {
