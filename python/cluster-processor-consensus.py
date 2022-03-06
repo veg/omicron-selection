@@ -6,12 +6,13 @@ from collections import Counter
 
 master     = {}
 attributes = {}
+sep_char = '/'
 
 SL = 0
 nucs = set (["A","C","G","T"])
 
 def seq_id (id):
-    return id.split ('|')[1]
+    return id.split (sep_char)[2]
     
     
 def cluster_label (core, ids):
@@ -46,6 +47,7 @@ def do_sequence (seq, by_position):
         by_position[k][seq[k*3:k*3+3]] += 1
     
 def compute_consensus (ids):
+    print ("Generating the consensus of %d sequences " % len (ids), file = sys.stderr)
     by_position = [Counter () for k in range (SL)]
     for sid in ids:
         if len (sid) > 0:
@@ -71,11 +73,12 @@ with open(sys.argv[2]) as handle:
         try:
             tags_pipe = record.id.split ('|')
             tags = record.id.split ('/')
-            epi_id = tags_pipe [1]
+            #hCoV-19/USA/WA-CDC-UW22013065303/2022|2022-01-30|2022-02-12||228615
+            epi_id = seq_id(record.id)
             attributes[epi_id] = [tags[1],tags_pipe[2]]
             master[epi_id] = S
         except Exception as e:
-            #print (tags_slash)
+            #print (record.id, file = sys.stderr)
             pass
             
 for_analysis = {}
@@ -90,6 +93,8 @@ with open(sys.argv[3]) as handle:
             #print (tags_slash)
             pass
             
+#print (counts, file = sys.stderr)
+                        
 for f in sys.argv[4:]:            
     with open(f) as handle:
         cluster_info = json.load (handle)
@@ -128,6 +133,7 @@ minL = int (sys.argv[1])
 # group by consensus because some of the sequences may compress to the same consensus
 
 by_consensus = {}
+
 
 for seq, members in for_analysis.items():
    if len (members) >= minL:

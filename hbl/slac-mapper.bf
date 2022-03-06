@@ -6,6 +6,7 @@ slac_json = io.ReadFromOrCreate ("Load SLAC fit file", {})["value"];
 site_count = (slac_json["input"])["number of sites"];
 tree_str = ((slac_json["input"])["trees"])[0];
 
+
 Topology T = tree_str;
 
 // store node order
