@@ -1,4 +1,4 @@
- Executable commands
+#Executable commands
 P3=python3.9
 BEALIGN=bealign
 BAM2MSA=bam2msa
@@ -10,16 +10,16 @@ FASTA_DIFF=fasta_diff
 
 
 T="${3:-0.00075}"
-clustering threshold
+#clustering threshold
 
 T2="${4:-0.002}"
-outliner threshold
+#outliner threshold
 
 T3="${5:-3}"
-minimum number of sequences per cluster to include in final tree
+#minimum number of sequences per cluster to include in final tree
 
 REF="${6:-NONE}"
-add sequences from this file as references (outgroups)
+#add sequences from this file as references (outgroups)
 
 FILE=$1
 PREV=$2
@@ -64,7 +64,7 @@ $P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.jso
 
 echo "Rebuilding consensus and striking orphans"
 
-$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq2.fas 
+$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
 
 
 if [ -z "$REF" ] || [ $REF == "NONE" ]

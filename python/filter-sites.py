@@ -9,6 +9,6 @@ with open(sys.argv[1]) as handle:
     for record in SeqIO.parse(handle, "fasta"):
         s = str (record.seq)
         if len (s) > 28000:
-            print ('>%s\n%s\n' % (record.id, s[ranges[0]:ranges[1]]))
+            print ('>%s\n%s\n' % (record.description.replace (' ', '_').replace ('__','_'), s[ranges[0]:ranges[1]]))
         
                 
