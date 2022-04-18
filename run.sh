@@ -1,9 +1,9 @@
 #Executable commands
 P3=python3.9
-BEALIGN=bealign
+BEALIGN=bealign 
 BAM2MSA=bam2msa
 HYPHY=hyphy
-HYPHYMPI="mpirun -np 8 HYPHYMPI"
+HYPHYMPI="mpirun -np 6 HYPHYMPI"
 RXML=raxml-ng
 TN93=tn93-cluster
 FASTA_DIFF=fasta_diff
@@ -24,11 +24,11 @@ REF="${6:-NONE}"
 FILE=$1
 PREV=$2
 
-echo "Removing spaces from sequence names "
-awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
-mv ${FILE}.rn ${FILE}
+#echo "Removing spaces from sequence names "
+#awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
+#mv ${FILE}.rn ${FILE}
 
-echo "Trimming down to the S neighborhood"
+echo "Trimming down to the S neighborhood and removing spaces from sequence names"
 $P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
 
 if [ -z "$PREV" ] || [ $PREV == "NONE" ]
@@ -48,6 +48,7 @@ else
     $FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
 fi
 
+
 echo "Compressing to unique haplotypes"
 $P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
 $P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
@@ -65,7 +66,7 @@ $P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.jso
 echo "Rebuilding consensus and striking orphans"
 
 $P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
-
+ 
 
 if [ -z "$REF" ] || [ $REF == "NONE" ]
 then
@@ -74,6 +75,8 @@ else
     echo "Appending reference sequences"
     cat $REF >> ${FILE}.S.uniq.fas 
 fi
+
+
 
 echo "Running raxml"
 $RXML --redo --threads 5 --msa ${FILE}.S.uniq.fas --tree pars{5} --model GTR+G+I
@@ -99,7 +102,7 @@ $HYPHY slac --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain --tree 
 $HYPHY hbl/slac-mapper.bf ${FILE}.S.uniq.fas.SLAC.json ${FILE}.subs.json
 
 echo "Running BGM"
-$HYPHY LIBPATH=/Users/sergei/Development/hyphy/res bgm --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --min-subs 2 --steps 1000000 --samples 1000 --burn-in 100000
+$HYPHY bgm --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --min-subs 2 --steps 1000000 --samples 1000 --burn-in 100000
 
 echo "Running BUSTED[S]"
 $HYPHY busted  --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --rates 3 --starting-points 5
