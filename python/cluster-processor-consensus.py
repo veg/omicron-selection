@@ -75,7 +75,10 @@ with open(sys.argv[2]) as handle:
             tags = record.id.split ('/')
             #hCoV-19/USA/WA-CDC-UW22013065303/2022|2022-01-30|2022-02-12||228615
             epi_id = seq_id(record.id)
-            attributes[epi_id] = [tags[1],tags_pipe[2]]
+            try:
+                attributes[epi_id] = [tags[1],tags_pipe[2]]
+            except:
+                 attributes[epi_id] = [tags[1], ""]
             master[epi_id] = S
         except Exception as e:
             #print (record.id, file = sys.stderr)
@@ -83,6 +86,7 @@ with open(sys.argv[2]) as handle:
             
 for_analysis = {}
 counts = {}
+
 
 with open(sys.argv[3]) as handle:
     for record in SeqIO.parse(handle, "fasta"):

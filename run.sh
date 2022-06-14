@@ -66,7 +66,6 @@ $P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.jso
 echo "Rebuilding consensus and striking orphans"
 
 $P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
- 
 
 if [ -z "$REF" ] || [ $REF == "NONE" ]
 then
@@ -75,8 +74,6 @@ else
     echo "Appending reference sequences"
     cat $REF >> ${FILE}.S.uniq.fas 
 fi
-
-
 
 echo "Running raxml"
 $RXML --redo --threads 5 --msa ${FILE}.S.uniq.fas --tree pars{5} --model GTR+G+I
