@@ -28,25 +28,25 @@ PREV=$2
 #awk '{ if ($0 ~ "^>") {sub(" ", "_"); print ;} else print;}' $FILE > ${FILE}.rn
 #mv ${FILE}.rn ${FILE}
 
-echo "Trimming down to the S neighborhood and removing spaces from sequence names"
-$P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
-
-if [ -z "$PREV" ] || [ $PREV == "NONE" ]
-then
-    echo "No previous run data"
-    echo "Running bealign on the entire alignment"
-    $BEALIGN -r CoV2-S ${FILE}.S.raw ${FILE}.S.bam
-    $BAM2MSA ${FILE}.S.bam ${FILE}.S.msa
-
-else
-    echo "Extracting new/changed sequences"
-    $FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
-    echo "Running bealign on the new sequences"
-    $BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
-    $BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
-    echo "Merging MSA files"
-    $FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
-fi
+# echo "Trimming down to the S neighborhood and removing spaces from sequence names"
+# $P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
+# 
+# if [ -z "$PREV" ] || [ $PREV == "NONE" ]
+# then
+#     echo "No previous run data"
+#     echo "Running bealign on the entire alignment"
+#     $BEALIGN -r CoV2-S ${FILE}.S.raw ${FILE}.S.bam
+#     $BAM2MSA ${FILE}.S.bam ${FILE}.S.msa
+# 
+# else
+#     echo "Extracting new/changed sequences"
+#     $FASTA_DIFF  -p remove -t id_sequence -m ${FILE}.S.raw ${PREV}.S.raw > ${FILE}.raw.diff
+#     echo "Running bealign on the new sequences"
+#     $BEALIGN -r CoV2-S ${FILE}.raw.diff  ${FILE}.S.diff.bam
+#     $BAM2MSA ${FILE}.S.diff.bam ${FILE}.S.diff.msa    
+#     echo "Merging MSA files"
+#     $FASTA_DIFF -p replace -t id_sequence -m ${FILE}.S.diff.msa    ${PREV}.S.msa > ${FILE}.S.msa  
+# fi
 
 
 echo "Compressing to unique haplotypes"

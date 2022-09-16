@@ -57,7 +57,7 @@ def convert_d (d, key):
     for i in range (len (d)):
         result.append ([d[str(i)][key],d[str(i)]['proportion']])
     return result
-
+    
 for root, dirs, files in os.walk(settings.input):
     dir_name = os.path.basename(root) 
     try:
