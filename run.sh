@@ -29,14 +29,14 @@ PREV=$2
 #mv ${FILE}.rn ${FILE}
 
 echo "Trimming down to the S neighborhood and removing spaces from sequence names"
-$P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
+#$P3 python/filter-sites.py $FILE  20000,26000 > ${FILE}.S.raw
 
 if [ -z "$PREV" ] || [ $PREV == "NONE" ]
 then
     echo "No previous run data"
     echo "Running bealign on the entire alignment"
-    $BEALIGN -r CoV2-S ${FILE}.S.raw ${FILE}.S.bam
-    $BAM2MSA ${FILE}.S.bam ${FILE}.S.msa
+    #$BEALIGN -r CoV2-S ${FILE}.S.raw ${FILE}.S.bam
+    #$BAM2MSA ${FILE}.S.bam ${FILE}.S.msa
 
 else
     echo "Extracting new/changed sequences"
@@ -50,17 +50,17 @@ fi
 
 
 echo "Compressing to unique haplotypes"
-$P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
-$P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
+#$P3 python/exact-copies.py  ${FILE}.S.msa > ${FILE}.u.clusters.json
+#$P3 python/cluster-processor.py ${FILE}.u.clusters.json > ${FILE}.S.u.fas
 
-$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
-$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
+#$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
+#$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
 
-echo "Compressing to haplotypes at $T distance and checking for outliers"
-$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
-$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
-$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
-$P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.json > ${FILE}.S.uniq-all.fas 2> ${FILE}.S.blacklist.txt
+#echo "Compressing to haplotypes at $T distance and checking for outliers"
+#$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
+#$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
+#$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
+#$P3 python/cluster-processor.py ${FILE}.t1.clusters.json ${FILE}.t2.clusters.json > ${FILE}.S.uniq-all.fas 2> ${FILE}.S.blacklist.txt
 
 
 echo "Rebuilding consensus and striking orphans"
