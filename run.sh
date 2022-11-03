@@ -56,7 +56,7 @@ echo "Compressing to unique haplotypes"
 #$TN93 -f -t 0.0 ${FILE}.S.u.fas > ${FILE}.t0.clusters.json
 #$P3 python/cluster-processor.py ${FILE}.t0.clusters.json > ${FILE}.S.all.fas
 
-#echo "Compressing to haplotypes at $T distance and checking for outliers"
+echo "Compressing to haplotypes at $T distance and checking for outliers"
 #$TN93 -f -t $T ${FILE}.S.all.fas > ${FILE}.t1.clusters.json
 #$P3 python/cluster-processor.py ${FILE}.t1.clusters.json > ${FILE}.S.uniq.fas
 #$TN93 -f -t $T2 ${FILE}.S.uniq.fas > ${FILE}.t2.clusters.json
@@ -65,18 +65,18 @@ echo "Compressing to unique haplotypes"
 
 echo "Rebuilding consensus and striking orphans"
 
-$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
+#$P3 python/cluster-processor-consensus.py $T3 ${FILE}.S.msa ${FILE}.S.uniq-all.fas ${FILE}.t1.clusters.json ${FILE}.t0.clusters.json ${FILE}.u.clusters.json > ${FILE}.S.uniq.fas 
 
 if [ -z "$REF" ] || [ $REF == "NONE" ]
 then
     echo "No reference sequences to add"
 else
     echo "Appending reference sequences"
-    cat $REF >> ${FILE}.S.uniq.fas 
+    #cat $REF >> ${FILE}.S.uniq.fas 
 fi
 
 echo "Running raxml"
-$RXML --redo --threads 5 --msa ${FILE}.S.uniq.fas --tree pars{5} --model GTR+G+I
+#$RXML --redo --threads 5 --msa ${FILE}.S.uniq.fas --tree pars{5} --model GTR+G+I
 
 echo "Labeling trees"
 if [ -z "$REF" ] || [ $REF == "NONE" ]
@@ -93,24 +93,26 @@ else
 fi
  
 echo "Running SLAC"
-$HYPHY slac --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain --tree ${FILE}.S.labeled.nwk --branches $ALL --samples 0
+$HYPHY slac --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain --tree ${FILE}.S.labeled.nwk --branches $ALL --samples 0 ENV="TOLERATE_NUMERICAL_ERRORS=1;"
 
 
 $HYPHY hbl/slac-mapper.bf ${FILE}.S.uniq.fas.SLAC.json ${FILE}.subs.json
 
 echo "Running BGM"
-$HYPHY bgm --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --min-subs 2 --steps 1000000 --samples 1000 --burn-in 100000
+$HYPHY bgm --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain --tree ${FILE}.S.labeled-internal.nwk --branches $INT --min-subs 2 --steps 1000000 --samples 1000 --burn-in 100000 ENV="TOLERATE_NUMERICAL_ERRORS=1;"
 
-echo "Running BUSTED[S]"
-$HYPHY busted  --alignment ${FILE}.S.uniq.fas --tree ${FILE}.S.labeled-internal.nwk --branches $INT --rates 3 --starting-points 5
 
 echo "Running FEL"
 
 
-$HYPHYMPI fel --alignment ${FILE}.S.uniq.fas  --tree ${FILE}.S.labeled-internal.nwk --branches $INT  --ci Yes
+$HYPHYMPI fel --alignment ${FILE}.S.uniq.fas  --kill-zero-lengths Constrain --tree ${FILE}.S.labeled-internal.nwk --branches $INT  --ci Yes ENV="TOLERATE_NUMERICAL_ERRORS=1;"
 
 echo "Running MEME"
-$HYPHYMPI meme --alignment ${FILE}.S.uniq.fas  --tree ${FILE}.S.labeled-internal.nwk --branches $INT 
+$HYPHYMPI meme --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain  --tree ${FILE}.S.labeled-internal.nwk --branches $INT ENV="TOLERATE_NUMERICAL_ERRORS=1;"
+
+echo "Running BUSTED[S]"
+$HYPHY busted  --alignment ${FILE}.S.uniq.fas --kill-zero-lengths Constrain --tree ${FILE}.S.labeled-internal.nwk --branches $INT --rates 3 --starting-points 5 ENV="TOLERATE_NUMERICAL_ERRORS=1;"
+
 
 echo "Extracting variant counts"
 $P3 python/countN.py ${FILE}.S.msa ${FILE}.S.uniq.fas ${FILE}.S.all.fas  > ${FILE}.S.json 2>${FILE}.S.genomes.json
